@@ -27,10 +27,9 @@ function Inicio(props){
     const registrarInformacion = async (e) =>{
         e.preventDefault();
 
-        console.log(formulario);
-    
         // llamamos a nuestro smart contract y utilizamos el metodo/Function para crear nuestra tarea "crearRegistro"
         try {
+          
             const result = await props.contract.methods.crearRegistro(
                 formulario.categoria,
                 formulario.fechaInicio,
@@ -39,12 +38,8 @@ function Inicio(props){
                 formulario.titulo
             ).send({from:props.account});
 
-            console.log(result);
-            console.log(result.events.RegistroCreado.returnValues);
-            console.log(result.status);
-
             if(result.status){
-                Swal.fire({
+                MySwal.fire({
                     position: 'top-end',
                     icon: 'success',
                     title: 'Tu registro fue exito',
@@ -56,8 +51,7 @@ function Inicio(props){
             }else{
                 errorTransacion();
             };
-    
-            
+ 
         } catch (error) {
             console.error(error);
             errorTransacion();

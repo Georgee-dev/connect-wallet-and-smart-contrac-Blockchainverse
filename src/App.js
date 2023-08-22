@@ -23,10 +23,7 @@ function App() {
   const [contract, setContract] = useState(null);
   const [verificacionWallet, setVerificacionWallet] = useState(false); //verificacion si tenemos una wallet en el navegador
   const [buttonWallet, setButtonWallet] = useState(false);
-
   const [listarInformacionEstudios, setListarInformacionEstudios] = useState([]);
-
-  console.log("listarInformacionEstudios ==>", listarInformacionEstudios);
 
   const MySwal = withReactContent(Swal);
 
@@ -46,26 +43,22 @@ function App() {
         setAccount(accounts[0]);
 
         // Obtener el saldo de la cuenta
-        const balanceWei = await web3Instance.eth.getBalance(accounts[0]); // Representa el saldo de una cuenta en wei
+        const balanceWei = await web3Instance.eth.getBalance(accounts[0]);  // Representa el saldo de una cuenta en wei
+
         const balanceEth = web3Instance.utils.fromWei(balanceWei, 'ether'); // Convertir el saldo en wei a ethe
         setBalance(balanceEth);
         setButtonWallet(false);
 
-
-        //smart contract
-        const networkId = await web3Instance.eth.net.getId(); //obtener el ID de la red blockchain en la que estamos conectados
-        
-        const contractInstance = new web3Instance.eth.Contract( 
-          smartContractRegistro, 
+        const contractInstance = new web3Instance.eth.Contract(
+          smartContractRegistro,
           smartContractRegistro && "0x34D44DBc2c73B0eCb4bC738bfB850f92AaB89ae2"
         ); //crear una instancia
         setContract(contractInstance);
-        console.log("contractInstance ==>", contractInstance);
 
         // llamado de metodos
       } catch (error) {
         console.error(error);
-        Swal.fire({
+        MySwal.fire({
           icon: 'error',
           title: 'Oops...',
           text: 'Has rechazado la solicitud de conexión con tu wallet'
@@ -78,57 +71,41 @@ function App() {
 
   };
 
-  const ListarRegistros = async () =>{
-    console.log("contract==>",contract);
+  const ListarRegistros = async () => {
+    // console.log("contract==>",contract);
     if (contract) {
-      try{
+      try {
         const contadorRegistros = await contract.methods.registroCounter().call();
-        console.log("contadorRegistros ==>",contadorRegistros);
 
         let arrayEstudio = [];
         for (let i = 1; i <= contadorRegistros; i++) {
           const inforestudio = await contract.methods.estudios(i).call();
-          // console.log(estudio);
-
-          
-          if(inforestudio.categoria !=" "){ 
-            
+          if (inforestudio.categoria != " ") {
             const estudio = {
               categoria: inforestudio.categoria,
               creatAtl: inforestudio.creatAtl,
               fechaFin: inforestudio.fechaFin,
               fechaInicio: inforestudio.fechaInicio,
-              id:inforestudio.id,
-              lugarDeFormacion:inforestudio.lugarDeFormacion,
+              id: inforestudio.id,
+              lugarDeFormacion: inforestudio.lugarDeFormacion,
               tituloEstudio: inforestudio.tituloEstudio,
               verificacion: inforestudio.verificacion
             };
-
             arrayEstudio.push(estudio);
-          
           };
-
-          // console.log(estudio);
         };
-
         setListarInformacionEstudios(arrayEstudio);
-
-        // const dataListar = () => {
-          // Array.from({ length: contadorRegistros }, async (_, index) => {
-          //     console.log(index)
-          //     const i = index +1;
-          //     const estudio = await contract.methods.estudios(i).call();
-          //   });
-        // };
 
       } catch (error) {
         console.error('Error al actualizar el valor:', error);
       }
     }
   };
+  useEffect(() => { ListarRegistros(); }, [contract]);
+
+
 
   useEffect(() => {
-
     async function Wallet() { //verificacion si tenemos una wallet disponible
       if (typeof window.ethereum !== 'undefined') {
         setVerificacionWallet(true);
@@ -138,9 +115,6 @@ function App() {
 
     Wallet();
   }, []);
-
-  useEffect(() => { ListarRegistros(); }, [contract]);
-  
 
   return (
     <>
@@ -159,15 +133,15 @@ function App() {
 
               {buttonWallet ? (
                 <button onClick={conectarWallet} className="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0 text-black">
-                  
+
                   Connect wallet
-                
+
                   <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" className="w-4 h-4 ml-1" viewBox="0 0 24 24">
                     <path d="M5 12h14M12 5l7 7-7 7"></path>
                   </svg>
 
                 </button>
-              ):(
+              ) : (
                 <button onClick={conectarWallet} className="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0 text-black">
                   wallet conectada
                 </button>
@@ -184,7 +158,7 @@ function App() {
       <Inicio account={account} balance={balance} contract={contract} />
 
       <ListaRegistro listarInformacionEstudios={listarInformacionEstudios} />
-      
+
     </>
 
 
